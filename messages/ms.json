@@ -1,0 +1,9 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "home_page": "Halaman utama",
+  "about_page": "Tentang",
+  "example_message": "Selamat datang ke aplikasi i18n anda.",
+  "language_label": "Bahasa",
+  "current_locale": "Bahasa semasa: {locale}",
+  "learn_router": "Pelajari Paraglide JS"
+}

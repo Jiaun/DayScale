@@ -1,0 +1,16 @@
+name: integrate-shop
+
+services:
+  app:
+    image: ${IMAGE:?IMAGE is required}
+    container_name: ${CONTAINER_NAME:-integrate-shop}
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-3000}:${APP_PORT:-3000}"
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: ${APP_PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL:-}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}

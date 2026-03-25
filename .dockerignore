@@ -1,0 +1,14 @@
+.git
+.gitignore
+.idea
+.vscode
+.tanstack
+.output
+node_modules
+dist
+coverage
+*.log
+.env
+.env.*
+!.env.production
+README.md
