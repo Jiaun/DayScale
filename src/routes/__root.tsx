@@ -5,14 +5,14 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 
-import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
-import { Button } from '@/components/ui/button'
+import type { QueryClient } from '@tanstack/react-query'
 
+import GlobalLayout from '@/components/layout/global-layout'
+import { Button } from '@/components/ui/button'
+import TanStackQueryProvider from '@/integrations/tanstack-query/root-provider'
 import { getLocale } from '@/paraglide/runtime'
 
 import appCss from '../styles.css?url'
-
-import type { QueryClient } from '@tanstack/react-query'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -22,8 +22,6 @@ const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getIte
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   beforeLoad: async () => {
-    // Other redirect strategies are possible; see
-    // https://github.com/TanStack/router/tree/main/examples/react/i18n-paraglide#offline-redirect
     if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('lang', getLocale())
     }
@@ -39,7 +37,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'integrate-shop',
+        title: 'Amortize',
       },
     ],
     links: [
@@ -63,7 +61,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere]">
         <TanStackQueryProvider>
-          {children}
+          <GlobalLayout>{children}</GlobalLayout>
         </TanStackQueryProvider>
         <Scripts />
       </body>
@@ -76,7 +74,9 @@ function RootErrorComponent(props: { error: Error; reset: () => void }) {
     <main className="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-16">
       <section className="w-full rounded-xl border border-destructive/20 bg-card p-8 text-card-foreground shadow-sm">
         <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Application error</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Application error
+          </h1>
           <p className="text-sm text-muted-foreground">
             {props.error.message || 'Unknown error'}
           </p>
@@ -97,7 +97,9 @@ function RootNotFoundComponent() {
     <main className="mx-auto flex min-h-screen max-w-3xl items-center px-6 py-16">
       <section className="w-full rounded-xl border bg-card p-8 text-card-foreground shadow-sm">
         <div className="space-y-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Page not found</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Page not found
+          </h1>
           <p className="text-sm text-muted-foreground">
             The page you requested does not exist.
           </p>
