@@ -8,15 +8,29 @@ import {
   MobileShell,
   PageTransition,
 } from '@/components/app/mobile-shell'
-import { profileActions, profileSettings } from '@/lib/app-data'
+import * as appData from '@/lib/app-data'
+import { profileActions } from '@/lib/app-data'
 import { itemVariants, listVariants } from '@/lib/motion/transitions'
 import { cn } from '@/lib/utils'
+
+import type { ExpenseRecord } from '@/lib/expense-metrics'
 
 export const Route = createFileRoute('/profile')({
   component: ProfileRoutePage,
 })
 
 function ProfileRoutePage() {
+  const appDataAny = appData as Record<string, unknown>
+  const useExpenseRecords = appDataAny.useExpenseRecords as
+    | undefined
+    | (() => ExpenseRecord[] | undefined)
+  const records =
+    useExpenseRecords?.() ??
+    (
+      appDataAny.expenseRecords as readonly ExpenseRecord[] | undefined
+    )?.slice() ??
+    []
+
   return (
     <MobileShell>
       <PageTransition>
@@ -45,39 +59,11 @@ function ProfileRoutePage() {
                       Jiaunun
                     </p>
                     <p className="mt-0.5 text-[12px] text-[#667085]">
-                      已记录 42 件商品
+                      已记录 {records.length} 件商品
                     </p>
                   </div>
                 </div>
                 <ChevronRight className="size-[18px] text-[#667085]" />
-              </div>
-            </motion.section>
-
-            <motion.section variants={itemVariants} className="space-y-0">
-              <p className="text-[12px] font-semibold text-[#667085]">
-                偏好设置
-              </p>
-              <div>
-                {profileSettings.map((item) => {
-                  const Icon = item.icon
-
-                  return (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between border-b border-[#d9dee7] py-[14px]"
-                    >
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <Icon className="size-4 shrink-0 text-[#101828]" />
-                        <p className="truncate text-[14px] leading-none text-[#101828]">
-                          {item.label}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-[12px] text-[#667085]">
-                        {item.value}
-                      </span>
-                    </div>
-                  )
-                })}
               </div>
             </motion.section>
 
@@ -88,6 +74,7 @@ function ProfileRoutePage() {
               <div>
                 {profileActions.map((item) => {
                   const Icon = item.icon
+                  const isDanger = 'danger' in item && Boolean(item.danger)
 
                   return (
                     <div
@@ -98,19 +85,19 @@ function ProfileRoutePage() {
                         <Icon
                           className={cn(
                             'size-4',
-                            item.danger ? 'text-[#ef4444]' : 'text-[#344054]',
+                            isDanger ? 'text-[#ef4444]' : 'text-[#344054]',
                           )}
                         />
                         <p
                           className={cn(
                             'text-[14px] leading-none',
-                            item.danger ? 'text-[#ef4444]' : 'text-[#101828]',
+                            isDanger ? 'text-[#ef4444]' : 'text-[#101828]',
                           )}
                         >
                           {item.label}
                         </p>
                       </div>
-                      {item.danger ? null : (
+                      {isDanger ? null : (
                         <ChevronRight className="size-4 text-[#667085]" />
                       )}
                     </div>

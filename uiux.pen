@@ -5959,6 +5959,17 @@
           ]
         }
       ]
+    },
+    {
+      "type": "text",
+      "id": "6QQPX",
+      "x": 0,
+      "y": 0,
+      "fill": "#000000",
+      "content": "588797",
+      "fontFamily": "Inter",
+      "fontSize": 12,
+      "fontWeight": "normal"
     }
   ],
   "themes": {

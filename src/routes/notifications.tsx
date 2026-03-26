@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, BellRing } from 'lucide-react'
 import { motion } from 'motion/react'
 
 import {
@@ -8,7 +8,11 @@ import {
   SectionCard,
 } from '@/components/app/mobile-shell'
 import { Button } from '@/components/ui/button'
-import { notifications } from '@/lib/app-data'
+import * as appData from '@/lib/app-data'
+import { expenseCategories } from '@/lib/app-data'
+import { buildNotifications } from '@/lib/expense-metrics'
+
+import type { ExpenseRecord } from '@/lib/expense-metrics'
 import {
   itemVariants,
   listVariants,
@@ -20,6 +24,26 @@ export const Route = createFileRoute('/notifications')({
 })
 
 function NotificationsPage() {
+  const appDataAny = appData as Record<string, unknown>
+  const useExpenseRecords = appDataAny.useExpenseRecords as
+    | undefined
+    | (() => ExpenseRecord[] | undefined)
+  const records =
+    useExpenseRecords?.() ??
+    (
+      appDataAny.expenseRecords as readonly ExpenseRecord[] | undefined
+    )?.slice() ??
+    []
+
+  const computedNotifications =
+    records.length > 0 ? buildNotifications(expenseCategories, records) : []
+  const latestNotification = computedNotifications.at(0)
+  const recentNotifications = computedNotifications.slice(1)
+  const latestRecord = [...records]
+    .sort((left, right) => right.purchasedAt.localeCompare(left.purchasedAt))
+    .at(0)
+  const PrimaryIcon = latestNotification ? latestNotification.icon : BellRing
+
   return (
     <MobileShell>
       <ContentBlock className="justify-between pb-4">
@@ -43,33 +67,59 @@ function NotificationsPage() {
             <SectionCard className="px-4 py-5">
               <div className="flex items-start gap-3">
                 <div className="flex size-10 items-center justify-center bg-[#111827] text-white">
-                  <Check className="size-4" />
+                  <PrimaryIcon className="size-4" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-[18px] font-semibold text-[#101828]">
-                    商品已新增
+                    {latestNotification?.title ?? '暂无提醒'}
                   </h2>
                   <p className="mt-0.5 text-[12px] text-[#667085]">
-                    MacBook Air 已进入摊销计算
+                    {latestNotification?.desc ?? '还没有商品操作记录'}
                   </p>
                 </div>
               </div>
               <p className="mt-4 text-[14px] leading-relaxed text-[#344054]">
-                系统已按购买日期开始计算日均摊销，你可以继续补充分类、备注或查看趋势。
+                {latestNotification
+                  ? '系统已按购买日期开始计算日均摊销，你可以继续补充分类、备注或查看趋势。'
+                  : '先新增商品，系统会在这里提供关键操作提醒。'}
               </p>
               <div className="mt-4 flex gap-2">
-                <Button
-                  asChild
-                  className="h-11 flex-1 bg-[#111827] text-[14px] font-semibold text-white hover:bg-[#111827]/90"
-                >
-                  <Link to="/new">查看详情</Link>
-                </Button>
+                {latestRecord ? (
+                  <Button
+                    asChild
+                    className="h-11 flex-1 bg-[#111827] text-[14px] font-semibold text-white hover:bg-[#111827]/90"
+                  >
+                    <Link
+                      to="/new"
+                      search={{
+                        mode: 'edit',
+                        id: latestRecord.id,
+                      }}
+                    >
+                      查看详情
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button
+                    disabled
+                    className="h-11 flex-1 bg-[#c7cdd8] text-[14px] font-semibold text-white"
+                  >
+                    查看详情
+                  </Button>
+                )}
                 <Button
                   asChild
                   variant="outline"
                   className="h-11 flex-1 border-[#d9dee7] text-[14px] font-semibold text-[#344054]"
                 >
-                  <Link to="/new">继续新增</Link>
+                  <Link
+                    to="/new"
+                    search={{
+                      mode: 'create',
+                    }}
+                  >
+                    继续新增
+                  </Link>
                 </Button>
               </div>
             </SectionCard>
@@ -85,12 +135,12 @@ function NotificationsPage() {
               animate="animate"
               className="space-y-0"
             >
-              {notifications.map((item) => {
+              {recentNotifications.map((item) => {
                 const Icon = item.icon
 
                 return (
                   <motion.article
-                    key={item.title}
+                    key={`${item.title}-${item.time}`}
                     variants={itemVariants}
                     className="flex items-center justify-between border-b border-[#d9dee7] py-[14px]"
                   >
@@ -111,6 +161,14 @@ function NotificationsPage() {
                   </motion.article>
                 )
               })}
+              {recentNotifications.length === 0 ? (
+                <motion.p
+                  variants={itemVariants}
+                  className="border-b border-[#d9dee7] py-[14px] text-[12px] text-[#667085]"
+                >
+                  暂无历史提醒
+                </motion.p>
+              ) : null}
             </motion.div>
           </section>
         </div>
